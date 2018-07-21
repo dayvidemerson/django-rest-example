@@ -1,0 +1,139 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+    <title>Acessando API</title>
+</head>
+<body>
+    <form>{% csrf_token %}
+        <label for="id_date">Data:</label><br />
+        <input name="date" id="id_date" type="date"/><br />
+        <div class="date erro"></div>
+        <label for="id_name">Nome:</label><br />
+        <input name="name" id="id_name" type="text" placeholder="Nome" /><br />
+        <div class="name erro"></div>
+        <label for="id_description">Descrição:</label><br />
+        <textarea name="description" id="id_description" placeholder="Descrição"></textarea><br />
+        <div class="description erro"></div>
+        <button id="btn_post_tasks" type="button">Enviar</button>
+        <button id="btn_get_tasks" type="button">Consultar Tarefas</button>
+    </form>
+    <ul id="ul_list_tasks"></ul>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script>
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie != '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = jQuery.trim(cookies[i]);
+                    if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        $('#btn_get_tasks').click(function() {
+            $.ajax({
+                url: "/api/tasks/",
+                method: 'GET',
+                data: {},
+                success: function(data) {
+                    for(let i = 0; i < data.length; i++) {
+                        $('#ul_list_tasks').append('<li>' + data[i].name + '</li>');
+                    }
+                },
+                error: function(error) {
+                    console.log(error);
+                }
+            });
+        });
+
+        $('#btn_post_tasks').click(function() {
+            $.ajax({
+                url: "/api/tasks/",
+                method: 'POST',
+                data: {
+                    "name": $("#id_name").val(),
+                    "description": $("#id_description").val(),
+                    "date": $('#id_date').val()
+                },
+                beforeSend: function(xhr, settings) {
+                    if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                        xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+                    }
+                },
+                success: function(data) {
+                    console.log(data);
+                },
+                error: function(error) {
+                    let json = error.responseJSON;
+                    if ('name' in json) {
+                        $('.name.erro').html(json.name);
+                    }
+                    if ('description' in json) {
+                        $('.description.erro').html(json.description);
+                    }
+                    if ('date' in json) {
+                        $('.date.erro').html(json.date);
+                    }
+                }
+            });
+        });
+
+        $('#btn_put_tasks').click(function() {
+            $.ajax({
+                url: "/api/tasks/" + id + '/',
+                method: 'PUT',
+                data: {
+                    "name": $("#id_name").val(),
+                    "description": $("#id_description").val(),
+                    "date": $('#id_date').val()
+                },
+                beforeSend: function(xhr, settings) {
+                    if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                        xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+                    }
+                },
+                success: function(data) {
+                    console.log(data);
+                },
+                error: function(error) {
+                    let json = error.responseJSON;
+                    if ('name' in json) {
+                        $('.name.erro').html(json.name);
+                    }
+                    if ('description' in json) {
+                        $('.description.erro').html(json.description);
+                    }
+                    if ('date' in json) {
+                        $('.date.erro').html(json.date);
+                    }
+                }
+            });
+        });
+
+        $('#btn_delete_tasks').click(function() {
+            $.ajax({
+                url: "/api/tasks/" + id + '/',
+                method: 'DELETE',
+                beforeSend: function(xhr, settings) {
+                    if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                        xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+                    }
+                },
+                success: function(data) {
+                    console.log(data);
+                },
+                error: function(error) {}
+            });
+        });
+    </script>
+</body>
+</html>
